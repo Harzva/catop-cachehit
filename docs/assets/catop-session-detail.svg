@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="430" viewBox="0 0 900 430" role="img" aria-label="catop session detail preview">
+  <rect width="900" height="430" rx="12" fill="#15110d"/>
+  <rect x="18" y="18" width="864" height="394" rx="9" fill="#f6f0e7" stroke="#111827" stroke-width="1.5"/>
+  <circle cx="43" cy="42" r="6" fill="#ef4444"/>
+  <circle cx="64" cy="42" r="6" fill="#f59e0b"/>
+  <circle cx="85" cy="42" r="6" fill="#22c55e"/>
+  <text x="118" y="47" fill="#374151" font-family="Consolas, Menlo, monospace" font-size="15">catop --litellm-proxy-log --session agent-loop-42 --once</text>
+  <text x="38" y="88" fill="#0f766e" font-family="Consolas, Menlo, monospace" font-size="18" font-weight="700">catop session agent-loop-42</text>
+  <text x="38" y="122" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">req=8 in=184,220 read=139,840 write=6,120 miss=38,260 hit=75.9% saved=$0.2147</text>
+  <text x="38" y="151" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">source=litellm-proxy price=litellm</text>
+  <line x1="38" y1="181" x2="862" y2="181" stroke="#c7b99f"/>
+  <text x="38" y="211" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">Time</text>
+  <text x="168" y="211" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">In</text>
+  <text x="278" y="211" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">Read</text>
+  <text x="388" y="211" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">Wr</text>
+  <text x="488" y="211" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">Miss</text>
+  <text x="598" y="211" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">Out</text>
+  <text x="700" y="211" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">Hit</text>
+  <text x="790" y="211" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">Saved</text>
+  <line x1="38" y1="229" x2="862" y2="229" stroke="#c7b99f"/>
+  <text x="38" y="261" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">10:14:03</text>
+  <text x="152" y="261" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">22,400</text>
+  <text x="268" y="261" fill="#0f766e" font-family="Consolas, Menlo, monospace" font-size="15">18,160</text>
+  <text x="388" y="261" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">640</text>
+  <text x="486" y="261" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">3,600</text>
+  <text x="594" y="261" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">820</text>
+  <text x="688" y="261" fill="#16a34a" font-family="Consolas, Menlo, monospace" font-size="15">81.1%</text>
+  <text x="786" y="261" fill="#16a34a" font-family="Consolas, Menlo, monospace" font-size="15">$0.0368</text>
+  <text x="38" y="302" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">10:16:37</text>
+  <text x="152" y="302" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">18,900</text>
+  <text x="268" y="302" fill="#0f766e" font-family="Consolas, Menlo, monospace" font-size="15">9,420</text>
+  <text x="388" y="302" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">1,020</text>
+  <text x="486" y="302" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">8,460</text>
+  <text x="594" y="302" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">1,140</text>
+  <text x="688" y="302" fill="#d97706" font-family="Consolas, Menlo, monospace" font-size="15">49.8%</text>
+  <text x="786" y="302" fill="#16a34a" font-family="Consolas, Menlo, monospace" font-size="15">$0.0188</text>
+  <text x="38" y="343" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">10:19:12</text>
+  <text x="152" y="343" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">31,780</text>
+  <text x="268" y="343" fill="#0f766e" font-family="Consolas, Menlo, monospace" font-size="15">27,120</text>
+  <text x="388" y="343" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">740</text>
+  <text x="486" y="343" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">3,920</text>
+  <text x="594" y="343" fill="#111827" font-family="Consolas, Menlo, monospace" font-size="15">960</text>
+  <text x="688" y="343" fill="#16a34a" font-family="Consolas, Menlo, monospace" font-size="15">85.3%</text>
+  <text x="786" y="343" fill="#16a34a" font-family="Consolas, Menlo, monospace" font-size="15">$0.0542</text>
+  <text x="38" y="388" fill="#6b7280" font-family="Consolas, Menlo, monospace" font-size="14">Wr=cache write, rows are timestamp ordered.</text>
+</svg>

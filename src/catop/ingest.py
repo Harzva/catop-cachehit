@@ -15,6 +15,7 @@ def event_from_litellm_record(
     *,
     default_agent: str = "jsonl",
     default_project: str = "-",
+    default_session: str = "-",
     claude_usage_semantics: bool = False,
 ) -> CacheEvent:
     usage = _first_dict(
@@ -82,6 +83,21 @@ def event_from_litellm_record(
             metadata.get("team_id"),
             metadata.get("user_api_key_alias"),
             default_project,
+        )
+    )
+    session_id = str(
+        _coalesce(
+            record.get("session_id"),
+            record.get("session"),
+            record.get("conversation_id"),
+            record.get("thread_id"),
+            metadata.get("session_id"),
+            metadata.get("session"),
+            metadata.get("conversation_id"),
+            metadata.get("thread_id"),
+            metadata.get("trace_id"),
+            record.get("id"),
+            default_session,
         )
     )
 
@@ -202,6 +218,7 @@ def event_from_litellm_record(
         cache_creation_tokens=cache_creation_tokens,
         reasoning_tokens=reasoning_tokens,
         actual_cost_usd=actual_cost_usd,
+        session_id=session_id,
     )
 
 
@@ -219,6 +236,7 @@ def events_from_jsonl(
     *,
     default_agent: str = "jsonl",
     default_project: str = "-",
+    default_session: str = "-",
     claude_usage_semantics: bool = False,
 ) -> Iterator[CacheEvent]:
     for line in lines:
@@ -233,6 +251,7 @@ def events_from_jsonl(
                 record,
                 default_agent=default_agent,
                 default_project=default_project,
+                default_session=default_session,
                 claude_usage_semantics=claude_usage_semantics,
             )
             if event.has_usage:

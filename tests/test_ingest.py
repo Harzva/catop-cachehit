@@ -10,7 +10,7 @@ def test_event_from_openai_style_usage_details() -> None:
         {
             "model": "gpt-4o",
             "litellm_provider": "openai",
-            "metadata": {"project": "agent-loop"},
+            "metadata": {"project": "agent-loop", "session_id": "run-42"},
             "usage": {
                 "prompt_tokens": 1000,
                 "completion_tokens": 120,
@@ -26,6 +26,7 @@ def test_event_from_openai_style_usage_details() -> None:
     assert event.agent == "jsonl"
     assert event.provider == "openai"
     assert event.project == "agent-loop"
+    assert event.session_id == "run-42"
     assert event.input_tokens == 1000
     assert event.cached_tokens == 400
     assert event.reasoning_tokens == 30

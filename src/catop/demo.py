@@ -34,6 +34,7 @@ def generate_demo_event(rng: random.Random | None = None) -> CacheEvent:
         cache_creation_tokens=cache_creation_tokens,
         output_tokens=rng.randint(80, 1800),
         reasoning_tokens=rng.choice([0, 0, 0, rng.randint(20, 600)]),
+        session_id=f"demo-{rng.randint(1, 4):02d}",
     )
 
 
@@ -56,6 +57,7 @@ def generate_demo_events(count: int = 15, seed: int | None = None) -> list[Cache
                 cache_creation_tokens=event.cache_creation_tokens,
                 output_tokens=event.output_tokens,
                 reasoning_tokens=event.reasoning_tokens,
+                session_id=event.session_id,
             )
         )
     return events

@@ -54,6 +54,7 @@ pricing.
 | Claude Code | Initial local scanner | `~/.claude/projects/**/*.jsonl`, `~/.claude/transcripts/**/*.jsonl` |
 | Codex CLI | Initial local scanner | `$CODEX_HOME/sessions/**/*.jsonl` or `~/.codex/sessions/**/*.jsonl` |
 | Generic LiteLLM/OpenAI logs | Supported | `--file` or `--stdin` JSONL |
+| LiteLLM Proxy callback | Supported | `catop.litellm_proxy.proxy_handler_instance` |
 
 Planned agents include OpenCode, Gemini CLI, Cursor, Copilot CLI, and other
 sources that expose real cache token metadata.
@@ -74,8 +75,8 @@ shape, not to copy UI or code. The takeaways applied to `catop` are:
 
 ## Still Needed
 
-- Time-window filters such as today, week, month, and custom date ranges.
-- A session-detail view so one row can expand into individual requests.
+- Custom date ranges beyond `today`, `week`, and `month`.
+- A richer session browser with search and keyboard navigation.
 - More agent scanners with tests and documented storage locations.
 - Provider fallback pricing beyond LiteLLM, such as OpenRouter/models.dev.
 - Explicit freshness indicators for price cache age and source.

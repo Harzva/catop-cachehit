@@ -67,6 +67,7 @@ def _read_path_events(
                     handle,
                     default_agent=default_agent,
                     default_project=default_project,
+                    default_session=path.stem,
                     claude_usage_semantics=claude_usage_semantics,
                 )
             )
@@ -106,6 +107,7 @@ def _read_codex_path_events(path: Path, *, default_project: str) -> list[CacheEv
                             record,
                             default_agent="codex",
                             default_project=current_project,
+                            default_session=path.stem,
                         )
                         if event.has_usage:
                             events.append(event)

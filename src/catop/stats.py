@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from catop.models import CacheEvent
 from catop.pricing import PriceCatalog
 
-VALID_GROUP_FIELDS = ("agent", "provider", "model", "project")
+VALID_GROUP_FIELDS = ("agent", "provider", "model", "project", "session")
 
 
 @dataclass
@@ -15,6 +15,7 @@ class MetricsRow:
     provider: str
     model: str
     project: str
+    session_id: str
     request_count: int = 0
     input_tokens: int = 0
     cached_tokens: int = 0
@@ -69,6 +70,7 @@ def aggregate_events(
                 provider=event.provider if "provider" in group_by else "*",
                 model=event.model if "model" in group_by else "*",
                 project=event.project if "project" in group_by else "*",
+                session_id=event.session_id if "session" in group_by else "*",
             )
         row = rows[key]
         row.request_count += 1
@@ -135,4 +137,6 @@ def parse_group_by(value: str) -> tuple[str, ...]:
 
 
 def _field_value(event: CacheEvent, field: str) -> str:
+    if field == "session":
+        return event.session_id
     return str(getattr(event, field))

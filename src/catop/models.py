@@ -19,6 +19,7 @@ class CacheEvent:
     cache_creation_tokens: int = 0
     reasoning_tokens: int = 0
     actual_cost_usd: float | None = None
+    session_id: str = "-"
 
     def __post_init__(self) -> None:
         if self.timestamp.tzinfo is None:
@@ -27,6 +28,7 @@ class CacheEvent:
         object.__setattr__(self, "provider", self.provider or "unknown")
         object.__setattr__(self, "model", self.model or "unknown")
         object.__setattr__(self, "project", self.project or "-")
+        object.__setattr__(self, "session_id", self.session_id or "-")
         object.__setattr__(self, "input_tokens", max(0, int(self.input_tokens)))
         object.__setattr__(self, "cached_tokens", max(0, int(self.cached_tokens)))
         object.__setattr__(self, "output_tokens", max(0, int(self.output_tokens)))

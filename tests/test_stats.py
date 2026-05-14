@@ -31,6 +31,7 @@ def test_summarize_and_group_events() -> None:
             cached_tokens=700,
             cache_creation_tokens=100,
             actual_cost_usd=0.01,
+            session_id="session-a",
         ),
         CacheEvent(
             timestamp=datetime.now(timezone.utc),
@@ -40,6 +41,7 @@ def test_summarize_and_group_events() -> None:
             project="alpha",
             input_tokens=500,
             cached_tokens=100,
+            session_id="session-b",
         ),
     ]
 
@@ -55,6 +57,7 @@ def test_summarize_and_group_events() -> None:
     assert summary.actual_cost_usd == 0.01
     assert len(rows) == 1
     assert rows[0].project == "alpha"
+    assert parse_group_by("session") == ("session",)
 
 
 def test_parse_group_by_rejects_unknown_fields() -> None:

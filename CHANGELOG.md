@@ -9,4 +9,7 @@
 - Add cache-hit aggregation by provider, model, and project.
 - Add cache read/write/miss display, estimated cached cost, and reasoning token parsing.
 - Add initial local scanners for Claude Code and Codex CLI session JSONL.
+- Add LiteLLM Proxy callback JSONL integration.
+- Add today/week/month time windows and single-session detail view.
+- Add GitHub Pages product page and expanded README screenshot gallery.
 - Add CI and cross-platform PyInstaller packaging workflows.

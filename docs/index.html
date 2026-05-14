@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="catop is a top-like terminal monitor for LLM prompt-cache hits, misses, cache writes, and estimated dollars saved."
+    />
+    <title>catop - LLM cachehit monitor</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="catop home">catop</a>
+      <nav aria-label="Primary navigation">
+        <a href="#signals">Signals</a>
+        <a href="#integrations">Integrations</a>
+        <a href="#screens">Screens</a>
+        <a href="https://github.com/Harzva/catop-cachehit">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+          <p class="eyebrow">Cache hits, cache misses, cache writes, saved USD.</p>
+          <h1 id="hero-title">Watch one thing deeply: LLM prompt-cache efficiency.</h1>
+          <p class="hero-copy">
+            `catop` is a compact terminal monitor for teams running coding agents,
+            RAG loops, eval runners, and LiteLLM Proxy traffic.
+          </p>
+          <div class="hero-actions" aria-label="Primary actions">
+            <a class="button primary" href="https://github.com/Harzva/catop-cachehit">View on GitHub</a>
+            <a class="button secondary" href="#quickstart">Quick start</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="signals" class="band signal-band">
+        <div class="section-head">
+          <p class="eyebrow">The first screen is the product</p>
+          <h2>Every number answers a cache question.</h2>
+        </div>
+        <div class="metric-grid">
+          <article>
+            <span>read</span>
+            <strong>cache hit tokens</strong>
+            <p>Input tokens served from provider-side cache.</p>
+          </article>
+          <article>
+            <span>write</span>
+            <strong>cache creation tokens</strong>
+            <p>Input tokens that created or refreshed cache entries.</p>
+          </article>
+          <article>
+            <span>miss</span>
+            <strong>normal input billing</strong>
+            <p>Tokens that did not benefit from cache pricing.</p>
+          </article>
+          <article>
+            <span>saved</span>
+            <strong>estimated USD saved</strong>
+            <p>Calculated from the LiteLLM model price map.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="quickstart" class="band command-band">
+        <div class="section-head">
+          <p class="eyebrow">Install, point, watch</p>
+          <h2>Run from source or from GitHub.</h2>
+        </div>
+        <div class="command-layout">
+          <pre><code>python -m pip install "catop @ git+https://github.com/Harzva/catop-cachehit.git"
+catop --demo --once
+catop --scan-agents --window today
+catop --litellm-proxy-log --group-by session</code></pre>
+          <div class="note">
+            <strong>Scope stays narrow.</strong>
+            <p>
+              `catop` is not a tracing platform. It is a cache-hit monitor that
+              keeps read/write/miss/savings visible while agents are running.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="integrations" class="band integration-band">
+        <div class="section-head">
+          <p class="eyebrow">Real data sources</p>
+          <h2>LiteLLM Proxy, Claude Code, Codex, and JSONL.</h2>
+        </div>
+        <div class="integration-list">
+          <article>
+            <h3>LiteLLM Proxy callback</h3>
+            <p>Writes successful request usage to JSONL without storing prompts.</p>
+          </article>
+          <article>
+            <h3>Local coding agents</h3>
+            <p>Scans Claude Code and Codex session stores when token usage is present.</p>
+          </article>
+          <article>
+            <h3>Provider pricing</h3>
+            <p>Uses LiteLLM's price map with a local TTL cache and offline fallbacks.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="screens" class="band screen-band">
+        <div class="section-head">
+          <p class="eyebrow">Screenshots</p>
+          <h2>Dense terminal views, not a dashboard maze.</h2>
+        </div>
+        <div class="screens">
+          <figure>
+            <img src="assets/catop-demo.svg" alt="catop grouped cache dashboard" />
+            <figcaption>Grouped by agent, provider, model, and project.</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/catop-session-detail.svg" alt="catop single session detail" />
+            <figcaption>Single session detail with ordered cache events.</figcaption>
+          </figure>
+          <figure>
+            <img src="assets/catop-litellm-proxy.svg" alt="catop LiteLLM Proxy callback flow" />
+            <figcaption>LiteLLM Proxy callback writes cache metadata to JSONL.</figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
