@@ -1,0 +1,28 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+
+# Local/generated artifacts from the previous prototype drop.
+Kimi_Agent_cachtop/
+*.deb
+*.zip
+harzva-github-repo-map.*
+markmap*.svg
+
+# OS/editor noise.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
