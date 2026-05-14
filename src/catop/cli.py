@@ -11,6 +11,7 @@ from rich.console import Console
 from rich.live import Live
 
 from catop import __version__
+from catop.agents import SUPPORTED_AGENTS, scan_many_agents
 from catop.demo import generate_demo_event, generate_demo_events
 from catop.ingest import read_jsonl_events, read_stdin_events
 from catop.models import CacheEvent
@@ -34,11 +35,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         timeout_seconds=args.price_timeout,
     )
     console = Console()
-    use_demo = args.demo or (args.file is None and not args.stdin)
-    source_label = _source_label(args, use_demo)
+    agents = _selected_agents(args)
+    use_demo = args.demo or (args.file is None and not args.stdin and not agents)
+    source_label = _source_label(args, use_demo, agents)
 
     if args.once:
-        events = _load_events(args, use_demo=use_demo, limit=args.limit)
+        events = _load_events(args, use_demo=use_demo, limit=args.limit, agents=agents)
         console.print(
             make_dashboard(
                 events,
@@ -50,7 +52,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 0
 
-    events = deque(_load_events(args, use_demo=use_demo, limit=args.limit), maxlen=args.limit)
+    events = deque(
+        _load_events(args, use_demo=use_demo, limit=args.limit, agents=agents),
+        maxlen=args.limit,
+    )
     rng = random.Random()
     with Live(
         make_dashboard(
@@ -68,7 +73,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             if use_demo:
                 events.append(generate_demo_event(rng))
             elif args.file is not None:
-                events = deque(read_jsonl_events(args.file)[-args.limit :], maxlen=args.limit)
+                events = deque(
+                    _recent_events(read_jsonl_events(args.file), args.limit),
+                    maxlen=args.limit,
+                )
+            elif agents:
+                events = deque(
+                    _recent_events(scan_many_agents(agents), args.limit),
+                    maxlen=args.limit,
+                )
             live.update(
                 make_dashboard(
                     list(events),
@@ -92,6 +105,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--file", type=Path, help="Read LiteLLM/OpenAI-style JSONL request logs.")
     parser.add_argument("--stdin", action="store_true", help="Read JSONL request logs from stdin.")
     parser.add_argument(
+        "--agent",
+        action="append",
+        choices=SUPPORTED_AGENTS,
+        help="Scan a local coding-agent session store. Repeat for multiple agents.",
+    )
+    parser.add_argument(
+        "--scan-agents",
+        action="store_true",
+        help="Scan every built-in local agent source currently supported by catop.",
+    )
+    parser.add_argument(
         "--interval",
         type=float,
         default=1.0,
@@ -101,7 +125,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--top", type=int, default=25, help="Maximum grouped rows to show.")
     parser.add_argument(
         "--group-by",
-        default="provider,model,project",
+        default="agent,provider,model,project",
         help=f"Comma-separated grouping fields: {', '.join(VALID_GROUP_FIELDS)}.",
     )
     parser.add_argument(
@@ -124,21 +148,42 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _load_events(args: argparse.Namespace, *, use_demo: bool, limit: int) -> list[CacheEvent]:
+def _load_events(
+    args: argparse.Namespace,
+    *,
+    use_demo: bool,
+    limit: int,
+    agents: tuple[str, ...],
+) -> list[CacheEvent]:
     if args.stdin:
-        return read_stdin_events()[-limit:]
+        return _recent_events(read_stdin_events(), limit)
     if args.file is not None:
-        return read_jsonl_events(args.file)[-limit:]
+        return _recent_events(read_jsonl_events(args.file), limit)
+    if agents:
+        return _recent_events(scan_many_agents(agents), limit)
     if use_demo:
-        return generate_demo_events(15)[-limit:]
+        return _recent_events(generate_demo_events(15), limit)
     return []
 
 
-def _source_label(args: argparse.Namespace, use_demo: bool) -> str:
+def _recent_events(events: list[CacheEvent], limit: int) -> list[CacheEvent]:
+    return sorted(events, key=lambda event: event.timestamp)[-limit:]
+
+
+def _source_label(args: argparse.Namespace, use_demo: bool, agents: tuple[str, ...]) -> str:
     if args.stdin:
         return "stdin-jsonl"
     if args.file is not None:
         return str(args.file)
+    if agents:
+        return "agents:" + ",".join(agents)
     if use_demo:
         return "demo"
     return "empty"
+
+
+def _selected_agents(args: argparse.Namespace) -> tuple[str, ...]:
+    agents = list(args.agent or [])
+    if args.scan_agents:
+        agents.extend(SUPPORTED_AGENTS)
+    return tuple(dict.fromkeys(agents))

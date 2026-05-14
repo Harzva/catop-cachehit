@@ -15,12 +15,12 @@ def test_price_catalog_estimates_saved_from_cache_read_delta() -> None:
         source="test",
     )
 
-    assert catalog.estimate_saved_usd("example-model", 1000) == 0.0015
+    assert catalog.estimate_saved_usd("example-model", 1000, 1000) == 0.0015
 
 
 def test_price_catalog_uses_provider_prefixed_alias() -> None:
     catalog = PriceCatalog.fallback()
 
-    saved = catalog.estimate_saved_usd("deepseek-chat", 1000, provider="deepseek")
+    saved = catalog.estimate_saved_usd("deepseek-chat", 1000, 1000, provider="deepseek")
 
     assert saved > 0

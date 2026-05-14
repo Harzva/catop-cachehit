@@ -23,15 +23,18 @@ def test_summarize_and_group_events() -> None:
     events = [
         CacheEvent(
             timestamp=datetime.now(timezone.utc),
+            agent="claude-code",
             provider="openai",
             model="gpt-4o",
             project="alpha",
-            input_tokens=1000,
+            input_tokens=1100,
             cached_tokens=700,
+            cache_creation_tokens=100,
             actual_cost_usd=0.01,
         ),
         CacheEvent(
             timestamp=datetime.now(timezone.utc),
+            agent="codex",
             provider="openai",
             model="gpt-4o",
             project="alpha",
@@ -45,7 +48,9 @@ def test_summarize_and_group_events() -> None:
 
     assert summary.request_count == 2
     assert summary.cached_tokens == 800
-    assert round(summary.hit_rate, 4) == round(800 / 1500, 4)
+    assert summary.cache_creation_tokens == 100
+    assert summary.miss_tokens == 700
+    assert round(summary.hit_rate, 4) == round(800 / 1600, 4)
     assert summary.saved_usd == pytest.approx(0.0008)
     assert summary.actual_cost_usd == 0.01
     assert len(rows) == 1

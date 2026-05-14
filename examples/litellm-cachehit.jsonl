@@ -1,3 +1,3 @@
-{"model":"gpt-4o","litellm_provider":"openai","metadata":{"project":"agent-loop"},"usage":{"prompt_tokens":1000,"completion_tokens":120,"prompt_tokens_details":{"cached_tokens":400}},"response_cost":0.002}
-{"model":"claude-sonnet-4-5","litellm_provider":"anthropic","metadata":{"project":"eval-runner"},"usage":{"prompt_tokens":8200,"completion_tokens":900,"prompt_tokens_details":{"cached_tokens":6100}},"response_cost":0.028}
-{"model":"deepseek-chat","litellm_provider":"deepseek","metadata":{"project":"rag-api"},"usage":{"input_tokens":2400,"output_tokens":300,"cache_read_input_tokens":1500},"spend":0.001}
+{"agent":"claude-code","model":"claude-sonnet-4-5","litellm_provider":"anthropic","metadata":{"project":"eval-runner"},"usage":{"input_tokens":8200,"completion_tokens":900,"cache_read_input_tokens":6100,"cache_creation_input_tokens":450},"response_cost":0.028}
+{"agent":"codex","model":"gpt-4o","litellm_provider":"openai","metadata":{"project":"agent-loop"},"usage":{"prompt_tokens":1000,"completion_tokens":120,"prompt_tokens_details":{"cached_tokens":400}},"response_cost":0.002}
+{"agent":"jsonl","model":"deepseek-chat","litellm_provider":"deepseek","metadata":{"project":"rag-api"},"usage":{"input_tokens":2400,"output_tokens":300,"cache_read_input_tokens":1500,"cache_creation_input_tokens":120},"spend":0.001}

@@ -7,4 +7,6 @@
 - Add LiteLLM price map loading with local TTL cache and offline fallback.
 - Add JSONL ingestion for OpenAI/LiteLLM-style token usage records.
 - Add cache-hit aggregation by provider, model, and project.
+- Add cache read/write/miss display, estimated cached cost, and reasoning token parsing.
+- Add initial local scanners for Claude Code and Codex CLI session JSONL.
 - Add CI and cross-platform PyInstaller packaging workflows.

@@ -21,14 +21,19 @@ def generate_demo_event(rng: random.Random | None = None) -> CacheEvent:
     input_tokens = rng.randint(500, 12000)
     hit_rate = min(max(rng.betavariate(5, 2), 0.0), 1.0)
     cached_tokens = int(input_tokens * hit_rate)
+    cache_creation_tokens = int(input_tokens * rng.uniform(0.02, 0.12))
+    input_tokens += cache_creation_tokens
     return CacheEvent(
         timestamp=datetime.now(timezone.utc),
+        agent=rng.choice(["demo", "claude-code", "codex"]),
         provider=provider,
         model=model,
         project=rng.choice(DEMO_PROJECTS),
         input_tokens=input_tokens,
         cached_tokens=cached_tokens,
+        cache_creation_tokens=cache_creation_tokens,
         output_tokens=rng.randint(80, 1800),
+        reasoning_tokens=rng.choice([0, 0, 0, rng.randint(20, 600)]),
     )
 
 
@@ -42,12 +47,15 @@ def generate_demo_events(count: int = 15, seed: int | None = None) -> list[Cache
         events.append(
             CacheEvent(
                 timestamp=timestamp,
+                agent=event.agent,
                 provider=event.provider,
                 model=event.model,
                 project=event.project,
                 input_tokens=event.input_tokens,
                 cached_tokens=event.cached_tokens,
+                cache_creation_tokens=event.cache_creation_tokens,
                 output_tokens=event.output_tokens,
+                reasoning_tokens=event.reasoning_tokens,
             )
         )
     return events

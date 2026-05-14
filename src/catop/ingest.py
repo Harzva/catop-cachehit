@@ -10,25 +10,52 @@ from typing import Any
 from catop.models import CacheEvent
 
 
-def event_from_litellm_record(record: dict[str, Any]) -> CacheEvent:
+def event_from_litellm_record(
+    record: dict[str, Any],
+    *,
+    default_agent: str = "jsonl",
+    default_project: str = "-",
+    claude_usage_semantics: bool = False,
+) -> CacheEvent:
     usage = _first_dict(
         record.get("usage"),
+        _nested(record, "message", "usage"),
+        _nested(record, "payload", "info", "last_token_usage"),
         _nested(record, "response", "usage"),
         _nested(record, "raw_response", "usage"),
         _nested(record, "litellm_response", "usage"),
     )
-    details = _first_dict(
+    input_details = _first_dict(
         usage.get("prompt_tokens_details"),
         usage.get("input_tokens_details"),
         _nested(record, "response", "usage", "prompt_tokens_details"),
     )
+    output_details = _first_dict(
+        usage.get("completion_tokens_details"),
+        usage.get("output_tokens_details"),
+        _nested(record, "response", "usage", "completion_tokens_details"),
+    )
     metadata = _first_dict(record.get("metadata"), record.get("litellm_metadata"))
+    attributes = _first_dict(record.get("attributes"), _nested(record, "payload", "attributes"))
 
+    agent = str(
+        _coalesce(
+            record.get("agent"),
+            record.get("client"),
+            record.get("source"),
+            metadata.get("agent"),
+            metadata.get("client"),
+            default_agent,
+        )
+    )
     model = str(
         _coalesce(
             record.get("model"),
             record.get("model_name"),
             record.get("model_id"),
+            usage.get("model"),
+            attributes.get("gen_ai.response.model"),
+            _nested(record, "message", "model"),
             _nested(record, "response", "model"),
             "unknown",
         )
@@ -38,7 +65,10 @@ def event_from_litellm_record(record: dict[str, Any]) -> CacheEvent:
             record.get("provider"),
             record.get("litellm_provider"),
             record.get("custom_llm_provider"),
+            usage.get("provider"),
+            attributes.get("gen_ai.system"),
             metadata.get("litellm_provider"),
+            _provider_from_model(model),
             "unknown",
         )
     )
@@ -51,14 +81,17 @@ def event_from_litellm_record(record: dict[str, Any]) -> CacheEvent:
             metadata.get("project"),
             metadata.get("team_id"),
             metadata.get("user_api_key_alias"),
-            "-",
+            default_project,
         )
     )
 
-    input_tokens = _to_int(
+    raw_input_tokens = _to_int(
         _coalesce(
             usage.get("prompt_tokens"),
             usage.get("input_tokens"),
+            usage.get("input"),
+            usage.get("tokensIn"),
+            attributes.get("gen_ai.usage.input_tokens"),
             record.get("prompt_tokens"),
             record.get("input_tokens"),
             0,
@@ -66,11 +99,18 @@ def event_from_litellm_record(record: dict[str, Any]) -> CacheEvent:
     )
     cached_tokens = _to_int(
         _coalesce(
-            details.get("cached_tokens"),
-            details.get("cache_read_input_tokens"),
+            input_details.get("cached_tokens"),
+            input_details.get("cache_read_input_tokens"),
             usage.get("cache_read_input_tokens"),
+            usage.get("input_cache_read"),
+            usage.get("cacheRead"),
+            usage.get("cacheReads"),
+            usage.get("cached"),
             usage.get("cached_tokens"),
+            usage.get("cached_input_tokens"),
+            usage.get("input_cached_tokens"),
             usage.get("prompt_cache_hit_tokens"),
+            attributes.get("gen_ai.usage.cache_read.input_tokens"),
             record.get("cache_read_input_tokens"),
             record.get("cached_tokens"),
             record.get("cache_hit_tokens"),
@@ -79,9 +119,16 @@ def event_from_litellm_record(record: dict[str, Any]) -> CacheEvent:
     )
     cache_creation_tokens = _to_int(
         _coalesce(
-            details.get("cache_creation_tokens"),
+            input_details.get("cache_creation_tokens"),
+            input_details.get("cache_creation_input_tokens"),
             usage.get("cache_creation_input_tokens"),
+            usage.get("input_cache_creation"),
+            usage.get("cacheCreate"),
+            usage.get("cacheWrite"),
+            usage.get("cacheWrites"),
+            attributes.get("gen_ai.usage.cache_creation.input_tokens"),
             record.get("cache_creation_input_tokens"),
+            record.get("cache_write_input_tokens"),
             0,
         )
     )
@@ -89,17 +136,44 @@ def event_from_litellm_record(record: dict[str, Any]) -> CacheEvent:
         _coalesce(
             usage.get("completion_tokens"),
             usage.get("output_tokens"),
+            usage.get("output"),
+            usage.get("tokensOut"),
+            usage.get("candidatesTokenCount"),
+            attributes.get("gen_ai.usage.output_tokens"),
             record.get("completion_tokens"),
             record.get("output_tokens"),
             0,
         )
     )
+    reasoning_tokens = _to_int(
+        _coalesce(
+            output_details.get("reasoning_tokens"),
+            output_details.get("reasoning_output_tokens"),
+            input_details.get("reasoning_tokens"),
+            input_details.get("reasoning_output_tokens"),
+            usage.get("reasoning_tokens"),
+            usage.get("reasoning_output_tokens"),
+            usage.get("thoughtsTokenCount"),
+            usage.get("thoughts"),
+            attributes.get("gen_ai.usage.reasoning.output_tokens"),
+            record.get("reasoning_tokens"),
+            0,
+        )
+    )
+
+    input_tokens = raw_input_tokens
+    if claude_usage_semantics and (cached_tokens or cache_creation_tokens):
+        input_tokens = raw_input_tokens + cached_tokens + cache_creation_tokens
+    else:
+        input_tokens = max(input_tokens, cached_tokens + cache_creation_tokens)
+
     actual_cost_usd = _to_optional_float(
         _coalesce(
             record.get("response_cost"),
             record.get("cost"),
             record.get("spend"),
             record.get("total_cost"),
+            _nested(usage, "cost", "total"),
             _nested(record, "response", "_hidden_params", "response_cost"),
             metadata.get("response_cost"),
         )
@@ -111,14 +185,14 @@ def event_from_litellm_record(record: dict[str, Any]) -> CacheEvent:
             record.get("startTime"),
             record.get("start_time"),
             record.get("created"),
+            _nested(record, "message", "timestamp"),
+            _nested(record, "payload", "timestamp"),
         )
     )
 
-    if input_tokens < cached_tokens:
-        input_tokens = cached_tokens
-
     return CacheEvent(
         timestamp=timestamp,
+        agent=agent,
         provider=provider,
         model=model,
         project=project,
@@ -126,6 +200,7 @@ def event_from_litellm_record(record: dict[str, Any]) -> CacheEvent:
         cached_tokens=cached_tokens,
         output_tokens=output_tokens,
         cache_creation_tokens=cache_creation_tokens,
+        reasoning_tokens=reasoning_tokens,
         actual_cost_usd=actual_cost_usd,
     )
 
@@ -139,7 +214,13 @@ def read_stdin_events() -> list[CacheEvent]:
     return list(events_from_jsonl(sys.stdin))
 
 
-def events_from_jsonl(lines: Iterable[str]) -> Iterator[CacheEvent]:
+def events_from_jsonl(
+    lines: Iterable[str],
+    *,
+    default_agent: str = "jsonl",
+    default_project: str = "-",
+    claude_usage_semantics: bool = False,
+) -> Iterator[CacheEvent]:
     for line in lines:
         stripped = line.strip().lstrip("\ufeff")
         if not stripped:
@@ -148,7 +229,14 @@ def events_from_jsonl(lines: Iterable[str]) -> Iterator[CacheEvent]:
         if record is None:
             continue
         if isinstance(record, dict):
-            yield event_from_litellm_record(record)
+            event = event_from_litellm_record(
+                record,
+                default_agent=default_agent,
+                default_project=default_project,
+                claude_usage_semantics=claude_usage_semantics,
+            )
+            if event.has_usage:
+                yield event
 
 
 def _nested(data: Any, *path: str) -> Any:
@@ -219,3 +307,17 @@ def _parse_timestamp(value: Any) -> datetime:
         except ValueError:
             return datetime.now(timezone.utc)
     return datetime.now(timezone.utc)
+
+
+def _provider_from_model(model: str) -> str | None:
+    if "/" in model:
+        return model.split("/", 1)[0]
+    if model.startswith("gpt-") or "codex" in model:
+        return "openai"
+    if model.startswith("claude-"):
+        return "anthropic"
+    if model.startswith("gemini-"):
+        return "google"
+    if model.startswith("deepseek-"):
+        return "deepseek"
+    return None

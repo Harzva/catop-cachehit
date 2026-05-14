@@ -24,16 +24,62 @@ class ModelPrice:
     cache_read_input_token_cost: float | None
     cache_creation_input_token_cost: float | None = None
     output_cost_per_token: float | None = None
+    output_cost_per_reasoning_token: float | None = None
 
-    def estimate_saved_usd(self, cached_tokens: int) -> float:
-        if (
-            cached_tokens <= 0
-            or self.input_cost_per_token is None
-            or self.cache_read_input_token_cost is None
-        ):
+    def estimate_uncached_cost_usd(
+        self,
+        input_tokens: int,
+        output_tokens: int = 0,
+        reasoning_tokens: int = 0,
+    ) -> float:
+        input_cost = _cost(input_tokens, self.input_cost_per_token)
+        output_cost = _cost(output_tokens, self.output_cost_per_token)
+        reasoning_cost = _cost(reasoning_tokens, self.reasoning_cost_per_token)
+        return input_cost + output_cost + reasoning_cost
+
+    def estimate_cached_cost_usd(
+        self,
+        input_tokens: int,
+        cached_tokens: int,
+        cache_creation_tokens: int = 0,
+        output_tokens: int = 0,
+        reasoning_tokens: int = 0,
+    ) -> float:
+        miss_tokens = max(input_tokens - cached_tokens - cache_creation_tokens, 0)
+        input_price = self.input_cost_per_token
+        read_price = self.cache_read_input_token_cost
+        write_price = self.cache_creation_input_token_cost
+        return (
+            _cost(miss_tokens, input_price)
+            + _cost(cached_tokens, read_price if read_price is not None else input_price)
+            + _cost(cache_creation_tokens, write_price if write_price is not None else input_price)
+            + _cost(output_tokens, self.output_cost_per_token)
+            + _cost(reasoning_tokens, self.reasoning_cost_per_token)
+        )
+
+    def estimate_saved_usd(
+        self,
+        input_tokens: int,
+        cached_tokens: int,
+        cache_creation_tokens: int = 0,
+        output_tokens: int = 0,
+        reasoning_tokens: int = 0,
+    ) -> float:
+        if input_tokens <= 0 or self.input_cost_per_token is None:
             return 0.0
-        delta = max(self.input_cost_per_token - self.cache_read_input_token_cost, 0.0)
-        return cached_tokens * delta
+        uncached = self.estimate_uncached_cost_usd(input_tokens, output_tokens, reasoning_tokens)
+        cached = self.estimate_cached_cost_usd(
+            input_tokens,
+            cached_tokens,
+            cache_creation_tokens,
+            output_tokens,
+            reasoning_tokens,
+        )
+        return max(uncached - cached, 0.0)
+
+    @property
+    def reasoning_cost_per_token(self) -> float | None:
+        return self.output_cost_per_reasoning_token or self.output_cost_per_token
 
 
 FALLBACK_PRICE_DATA: dict[str, dict[str, Any]] = {
@@ -107,6 +153,9 @@ class PriceCatalog:
                 provider=str(data.get("litellm_provider") or data.get("provider") or "unknown"),
                 input_cost_per_token=_optional_float(data.get("input_cost_per_token")),
                 output_cost_per_token=_optional_float(data.get("output_cost_per_token")),
+                output_cost_per_reasoning_token=_optional_float(
+                    data.get("output_cost_per_reasoning_token")
+                ),
                 cache_read_input_token_cost=_optional_float(data.get("cache_read_input_token_cost")),
                 cache_creation_input_token_cost=_optional_float(
                     data.get("cache_creation_input_token_cost")
@@ -132,13 +181,44 @@ class PriceCatalog:
     def estimate_saved_usd(
         self,
         model: str,
+        input_tokens: int,
         cached_tokens: int,
+        cache_creation_tokens: int = 0,
+        output_tokens: int = 0,
+        reasoning_tokens: int = 0,
         provider: str | None = None,
     ) -> float:
         price = self.get(model, provider=provider)
         if price is None:
             return 0.0
-        return price.estimate_saved_usd(cached_tokens)
+        return price.estimate_saved_usd(
+            input_tokens,
+            cached_tokens,
+            cache_creation_tokens,
+            output_tokens,
+            reasoning_tokens,
+        )
+
+    def estimate_cached_cost_usd(
+        self,
+        model: str,
+        input_tokens: int,
+        cached_tokens: int,
+        cache_creation_tokens: int = 0,
+        output_tokens: int = 0,
+        reasoning_tokens: int = 0,
+        provider: str | None = None,
+    ) -> float:
+        price = self.get(model, provider=provider)
+        if price is None:
+            return 0.0
+        return price.estimate_cached_cost_usd(
+            input_tokens,
+            cached_tokens,
+            cache_creation_tokens,
+            output_tokens,
+            reasoning_tokens,
+        )
 
     def provider_for(self, model: str, provider: str | None = None) -> str:
         price = self.get(model, provider=provider)
@@ -211,6 +291,12 @@ def _optional_float(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _cost(tokens: int, price: float | None) -> float:
+    if tokens <= 0 or price is None:
+        return 0.0
+    return tokens * price
 
 
 def _model_aliases(model: str, provider: str | None = None) -> list[str]:

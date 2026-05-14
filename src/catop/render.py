@@ -30,7 +30,8 @@ def make_dashboard(
     summary_text.append(
         (
             f"req={summary.request_count} in={_tokens(summary.input_tokens)} "
-            f"cache={_tokens(summary.cached_tokens)} miss={_tokens(summary.miss_tokens)} "
+            f"read={_tokens(summary.cached_tokens)} write={_tokens(summary.cache_creation_tokens)} "
+            f"miss={_tokens(summary.miss_tokens)} "
         ),
         style="bold",
     )
@@ -38,17 +39,23 @@ def make_dashboard(
     summary_text.append(f"saved={_money(summary.saved_usd)}", style="green")
 
     source_text = Text(
-        f"source={source_label} price={catalog.source} | Ctrl+C quit | --help options",
+        (
+            f"out={_tokens(summary.output_tokens)} reason={_tokens(summary.reasoning_tokens)} "
+            f"est_cost={_money(summary.estimated_cost_usd)} "
+            f"source={source_label} price={catalog.source}"
+        ),
         style="dim",
     )
     if summary.actual_cost_usd:
         source_text.append(f" | observed_cost={_money(summary.actual_cost_usd)}")
+    source_text.append(" | Ctrl+C quit | --help options")
 
     table = Table(expand=True, show_lines=False, box=box.ASCII)
-    table.add_column("Group", overflow="fold", ratio=1)
+    table.add_column("Group", overflow="crop", no_wrap=True, ratio=2)
     table.add_column("Req", justify="right", no_wrap=True)
-    table.add_column("Input", justify="right", no_wrap=True)
-    table.add_column("Cache", justify="right", no_wrap=True)
+    table.add_column("In", justify="right", no_wrap=True)
+    table.add_column("Read", justify="right", no_wrap=True)
+    table.add_column("Write", justify="right", no_wrap=True)
     table.add_column("Miss", justify="right", no_wrap=True)
     table.add_column("Hit%", justify="right", no_wrap=True)
     table.add_column("Saved", justify="right", no_wrap=True)
@@ -56,20 +63,21 @@ def make_dashboard(
     for row in rows:
         hit_style = "green" if row.hit_rate >= 0.7 else "yellow" if row.hit_rate >= 0.4 else "red"
         table.add_row(
-            f"{row.provider}/{row.model}/{row.project}",
+            f"{row.agent} / {row.provider} / {row.model} / {row.project}",
             str(row.request_count),
             _tokens(row.input_tokens),
             _tokens(row.cached_tokens),
+            _tokens(row.cache_creation_tokens),
             _tokens(row.miss_tokens),
             Text(f"{row.hit_rate * 100:5.1f}%", style=hit_style),
             _money(row.saved_usd),
         )
 
     if not rows:
-        table.add_row("-", "0", "0", "0", "0", "0.0%", "$0.0000")
+        table.add_row("-", "0", "0", "0", "0", "0", "0.0%", "$0.0000")
 
     footer = Text(
-        "Focused scope: cache hit rate, cached/miss tokens, and estimated dollars saved.",
+        "Cache fields: read=cache hit, write=cache creation, miss=uncached input.",
         style="dim",
     )
     return Group(Panel(Group(summary_text, source_text), title=title, box=box.ASCII), table, footer)

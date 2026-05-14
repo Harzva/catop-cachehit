@@ -6,33 +6,37 @@
   <circle cx="85" cy="42" r="6" fill="#22c55e"/>
   <text x="118" y="47" fill="#9ca3af" font-family="Consolas, Menlo, monospace" font-size="15">catop --demo --once</text>
   <text x="38" y="88" fill="#67e8f9" font-family="Consolas, Menlo, monospace" font-size="18" font-weight="700">catop cachehit monitor</text>
-  <text x="38" y="122" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">req=15 in=101,823 cache=65,475 miss=36,348 hit=64.3% saved=$0.0862</text>
+  <text x="38" y="122" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">req=15 in=101,823 read=65,475 write=4,320 miss=32,028 hit=64.3% saved=$0.0862</text>
   <text x="38" y="151" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">source=demo price=cache | Ctrl+C quit | --help options</text>
   <line x1="38" y1="181" x2="862" y2="181" stroke="#334155"/>
   <text x="38" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Group</text>
   <text x="468" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Req</text>
   <text x="540" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Input</text>
-  <text x="630" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Cache</text>
-  <text x="720" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Hit%</text>
-  <text x="798" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Saved</text>
+  <text x="630" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Read</text>
+  <text x="700" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Write</text>
+  <text x="770" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Hit%</text>
+  <text x="830" y="211" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Saved</text>
   <line x1="38" y1="229" x2="862" y2="229" stroke="#334155"/>
-  <text x="38" y="261" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">anthropic/claude-sonnet-4-5/chatops</text>
+  <text x="38" y="261" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">claude-code / anthropic / claude-sonnet-4-5</text>
   <text x="478" y="261" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">2</text>
   <text x="532" y="261" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">20,280</text>
   <text x="622" y="261" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">15,852</text>
-  <text x="720" y="261" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">78.2%</text>
-  <text x="795" y="261" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">$0.0428</text>
-  <text x="38" y="302" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">openai/gpt-4o/agent-loop</text>
+  <text x="700" y="261" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">720</text>
+  <text x="770" y="261" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">78.2%</text>
+  <text x="830" y="261" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">$0.0428</text>
+  <text x="38" y="302" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">codex / openai / gpt-4o / agent-loop</text>
   <text x="478" y="302" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">4</text>
   <text x="532" y="302" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">13,588</text>
   <text x="630" y="302" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">9,192</text>
-  <text x="720" y="302" fill="#eab308" font-family="Consolas, Menlo, monospace" font-size="15">67.6%</text>
-  <text x="795" y="302" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">$0.0115</text>
-  <text x="38" y="343" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">deepseek/deepseek-chat/rag-api</text>
+  <text x="700" y="302" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">180</text>
+  <text x="770" y="302" fill="#eab308" font-family="Consolas, Menlo, monospace" font-size="15">67.6%</text>
+  <text x="830" y="302" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">$0.0115</text>
+  <text x="38" y="343" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">jsonl / deepseek / deepseek-chat / rag-api</text>
   <text x="478" y="343" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">3</text>
   <text x="532" y="343" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">18,442</text>
   <text x="622" y="343" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">14,807</text>
-  <text x="720" y="343" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">80.3%</text>
-  <text x="795" y="343" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">$0.0037</text>
-  <text x="38" y="388" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Focused scope: cache hit rate, cached/miss tokens, and estimated dollars saved.</text>
+  <text x="700" y="343" fill="#e5e7eb" font-family="Consolas, Menlo, monospace" font-size="15">120</text>
+  <text x="770" y="343" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">80.3%</text>
+  <text x="830" y="343" fill="#22c55e" font-family="Consolas, Menlo, monospace" font-size="15">$0.0037</text>
+  <text x="38" y="388" fill="#94a3b8" font-family="Consolas, Menlo, monospace" font-size="14">Cache fields: read=cache hit, write=cache creation, miss=uncached input.</text>
 </svg>

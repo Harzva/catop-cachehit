@@ -5,7 +5,7 @@
   <p>
     <a href="#quick-start">Quick Start</a>
     ·
-    <a href="#litellm-jsonl-input">LiteLLM Input</a>
+    <a href="#supported-inputs">Supported Inputs</a>
     ·
     <a href="#roadmap">Roadmap</a>
     ·
@@ -34,10 +34,17 @@ systems, coding loops, and eval runners make repeated LLM calls.
 | Signal | Meaning |
 | --- | --- |
 | Cache hit rate | How much of your input token traffic was served from prompt cache |
-| Cached tokens | Input tokens that used provider-side prompt caching |
+| Cache read tokens | Input tokens that used provider-side prompt caching |
+| Cache write tokens | Input tokens that created or refreshed cache entries |
 | Miss tokens | Input tokens billed as normal non-cached input |
 | Saved USD | Estimated savings from cached input token pricing |
-| Grouping | Provider, model, and project/team attribution |
+| Grouping | Agent, provider, model, and project/team attribution |
+
+Current dashboard fields:
+
+```text
+req, input, cache read, cache write, miss, output, reasoning, hit%, estimated cost, observed cost, saved USD
+```
 
 ## Quick Start
 
@@ -54,12 +61,32 @@ Render one snapshot and exit:
 catop --demo --once --top 5
 ```
 
+Scan local coding-agent sessions:
+
+```bash
+catop --agent claude-code --once
+catop --agent codex --once
+catop --scan-agents --once
+```
+
 Use it after publishing to GitHub:
 
 ```bash
 python -m pip install "catop @ git+https://github.com/Harzva/catop-cachehit.git"
 catop --demo --once
 ```
+
+## Supported Inputs
+
+| Source | Status | Default location / input |
+| --- | --- | --- |
+| LiteLLM/OpenAI JSONL | Supported | `catop --file logs.jsonl` or `catop --stdin` |
+| Claude Code | Initial support | `~/.claude/projects/**/*.jsonl`, `~/.claude/transcripts/**/*.jsonl` |
+| Codex CLI | Initial support | `$CODEX_HOME/sessions/**/*.jsonl` or `~/.codex/sessions/**/*.jsonl` |
+| Demo mode | Supported | `catop --demo` |
+
+Agent scanning is deliberately conservative: `catop` only counts records that
+contain real token usage metadata. It does not estimate missing cache data.
 
 ## LiteLLM JSONL Input
 
@@ -70,10 +97,10 @@ request log object.
 catop --file examples/litellm-cachehit.jsonl --once
 ```
 
-Pipe logs from another process:
+Pipe a finite JSONL log:
 
 ```bash
-tail -f ./litellm-requests.jsonl | catop --stdin --once
+cat ./litellm-requests.jsonl | catop --stdin --once
 ```
 
 Example record:
@@ -93,7 +120,26 @@ Example record:
 ```
 
 `catop` also recognizes common cache fields such as `cache_read_input_tokens`,
-`cached_tokens`, `cache_hit_tokens`, and `cache_creation_input_tokens`.
+`cached_tokens`, `cache_hit_tokens`, `cache_creation_input_tokens`,
+`cacheReads`, `cacheWrites`, and OpenTelemetry-style `gen_ai.usage.*`
+attributes.
+
+## Provider Coverage
+
+`catop` can parse any provider/model name present in JSONL or agent logs. Cost
+and savings estimates require a price entry. The current pricing path is:
+
+1. LiteLLM model price map, cached locally.
+2. Embedded fallback prices for common demo models.
+3. Zero-dollar estimate when pricing is unknown.
+
+| Provider family | Pricing status | Notes |
+| --- | --- | --- |
+| OpenAI / Codex | LiteLLM + fallback for common models | Cache read pricing supported when present |
+| Anthropic / Claude | LiteLLM + fallback for common models | Cache read and cache creation pricing supported |
+| DeepSeek | LiteLLM + fallback for common models | Cache read pricing supported |
+| Google / Gemini | LiteLLM when available | Agent parser recognizes common cached-content fields |
+| OpenRouter-style aliases | Partial | Model aliases are normalized when possible |
 
 ## Savings Formula
 
@@ -102,7 +148,8 @@ for 24 hours. If the network is unavailable, it falls back to a small embedded
 price table for common demo models.
 
 ```text
-saved_usd = cached_tokens * (input_cost_per_token - cache_read_input_token_cost)
+saved_usd = no_cache_cost - cached_cost
+cached_cost = miss_input_cost + cache_read_cost + cache_creation_cost + output_cost
 ```
 
 If a log record includes actual response cost, `catop` displays it separately as
@@ -119,9 +166,12 @@ catop --help
 | `--demo` | Run with simulated cache-hit traffic |
 | `--file PATH` | Read LiteLLM/OpenAI-style JSONL request logs |
 | `--stdin` | Read JSONL request logs from standard input |
+| `--agent claude-code` | Scan Claude Code local session JSONL |
+| `--agent codex` | Scan Codex CLI local session JSONL |
+| `--scan-agents` | Scan every built-in local agent source |
 | `--once` | Print one snapshot and exit |
 | `--top N` | Limit grouped rows in the dashboard |
-| `--group-by provider,model,project` | Choose grouping dimensions |
+| `--group-by agent,provider,model,project` | Choose grouping dimensions |
 | `--refresh-prices` | Refresh the LiteLLM price cache |
 
 ## Architecture
@@ -129,18 +179,20 @@ catop --help
 ```mermaid
 flowchart LR
     A["LiteLLM / OpenAI JSONL logs"] --> B["catop ingest"]
-    C["Demo stream"] --> B
-    D["LiteLLM price map"] --> E["local TTL cache"]
-    E --> F["savings estimator"]
-    B --> G["cache-hit aggregator"]
-    F --> G
-    G --> H["Rich terminal dashboard"]
+    C["Claude Code / Codex sessions"] --> B
+    D["Demo stream"] --> B
+    E["LiteLLM price map"] --> F["local TTL cache"]
+    F --> G["savings estimator"]
+    B --> H["cache-hit aggregator"]
+    G --> H
+    H --> I["Rich terminal dashboard"]
 ```
 
 ## Repository Layout
 
 ```text
 src/catop/
+  agents.py    Claude Code and Codex local session scanners
   cli.py       command entry point
   demo.py      simulated cache-hit stream
   ingest.py    LiteLLM/OpenAI-style JSONL parser
@@ -149,6 +201,7 @@ src/catop/
   stats.py     cache-hit aggregation and savings calculation
 tests/         focused unit tests
 examples/      small JSONL fixtures for quick local checks
+docs/          coverage notes and README assets
 ```
 
 ## Roadmap
